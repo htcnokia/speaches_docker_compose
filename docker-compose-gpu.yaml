@@ -1,0 +1,33 @@
+services:
+  speaches:
+    image: ghcr.io/speaches-ai/speaches:latest-cuda-12.6.3
+    container_name: speaches
+    restart: always
+    ports:
+      - "3138:8000"
+    environment:
+      - LOOPBACK_HOST_URL=http://localhost:8000
+      - SPEACHES_PRELOAD_MODELS=[{"model":"Systran/faster-whisper-medium"}]
+      - HF_ENDPOINT=https://hf-mirror.com
+      - API_KEY=sk-speaches-7b56666666666666b6c5d4
+      - WHISPER__CPU_THREADS=8
+      - WHISPER__COMPUTE_TYPE=int8
+      - WHISPER__NUM_WORKERS=1
+    # --- 添加以下部分使用显卡 ---
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]      
+    volumes:
+      - speaches-hf-cache:/home/ubuntu/.cache/huggingface/hub
+    networks:
+      - myai_network
+volumes:
+  speaches-hf-cache:
+
+networks:
+  myai_network:
+    external: true
